@@ -11,8 +11,11 @@ struct TreeNode {
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
 };
 
+//Самые основы - обходы. Все нужно знать наизусть.
+
 //Иди максимально влево, и клади все в стек
 //Когда достаешь из стека посторяй
+//Inroder - выучить (лево - корень - право)
 std::vector<int> inorderTraversal(TreeNode* root) {    
     std::vector<int> res;
     if(!root)
@@ -56,6 +59,7 @@ std::vector<int> inorderTraversal(TreeNode* root) {
 }
 
 //корень → лево → право.
+//Выучить
 std::vector<int> PreorderTraversal(TreeNode* root)
 {
     std::vector<int> res;
@@ -80,9 +84,9 @@ std::vector<int> PreorderTraversal(TreeNode* root)
 }
 
 //Postorder — порядок лево → право → корень
+//Можно выучить но важнее следующий
 std::vector<int> postorderTraversal(TreeNode* root)
 {
-
     std::vector<int> res;
     if(!root)
     {
@@ -108,9 +112,38 @@ std::vector<int> postorderTraversal(TreeNode* root)
     return res;
 }
 
+//Идиоматичный (Без разворота)
+//Выучить
+std::vector<int> postorderTraversal_2(TreeNode* root)
+{
+    std::stack<TreeNode*> st;
+    TreeNode* cur = root;
+    TreeNode* lastVisited = nullptr;
+
+    while (cur || !st.empty()) {
+        // 1. Спускаемся максимально влево, складывая по пути в стек
+        while (cur) {
+            st.push(cur);
+            cur = cur->left;
+        }
+        
+        TreeNode* peekNode = st.top();
+        
+        // 2. Если есть правый ребёнок и мы его ЕЩЁ не обработали — идём туда
+        if (peekNode->right && lastVisited != peekNode->right) {
+            cur = peekNode->right;
+        } else {
+            // 3. Иначе — оба ребёнка обработаны (или их не было), можно обработать сам узел
+            // ... обработка peekNode ...
+            lastVisited = peekNode;
+            st.pop();
+        }
+    }
+}
 
 //Вернуть vector<vector<int>>, где каждый вложенный vector — 
 //это значения узлов одного уровня дерева, сверху вниз
+//То как вывести по уровням - выучить
 std::vector<std::vector<int>> levelOrder(TreeNode* root) {
     std::vector<std::vector<int>> res;
 
@@ -156,14 +189,20 @@ std::vector<std::vector<int>> levelOrder(TreeNode* root) {
 }
 
 
+
+
+//Основы Bottom-Up задачи - тут дети передают какую-то информацию родителям
+
 // вернуть высоту дерева (количество узлов на самом длинном пути от корня до листа)
 // Идиоматичная рекурсивная версия:
+//Выучить
 int maxDepth(TreeNode* root) {
     if (!root) return 0;
     return 1 + std::max(maxDepth(root->left), maxDepth(root->right));
 }
 
 // Версия без рекурсии:
+//Обход в глубину - выучить
 int maxDepthNoRecursion(TreeNode* root) {
     if(!root)
     {
@@ -196,11 +235,10 @@ int maxDepthNoRecursion(TreeNode* root) {
     return height;
 }
 
-
-
 // Дерево называется сбалансированным, если для КАЖДОГО узла 
 // разница высот его левого и правого поддеревьев не превышает 1
 //Версия с рекурсией и сложностью O(n^2)
+//Не учим
 bool isBalanced(TreeNode* root) {
     if(!root)
     {
@@ -217,6 +255,7 @@ bool isBalanced(TreeNode* root) {
 }
 
 //Версия с рекурсией и сложностью O(N) (Мы объединили две реккурсии)
+//Выучить!!!
 int get_height(TreeNode* root)
 {
     if(!root)
@@ -237,7 +276,6 @@ int get_height(TreeNode* root)
     return 1 + std::max(res_1, res_2);
 }
 
-
 bool isBalanced_2(TreeNode* root)
 {
     if(!root)
@@ -247,7 +285,7 @@ bool isBalanced_2(TreeNode* root)
     return get_height(root) != -1;
 }
 
-//Версия без рекурсии
+//Версия без рекурсии но по памяти O(N)
 bool isBalancedNoRecursion(TreeNode* root)
 {
     if(!root)
@@ -261,8 +299,6 @@ bool isBalancedNoRecursion(TreeNode* root)
     while(!st.empty())
     {
         TreeNode* currentNode = st.top();
-        //st.pop();
-
         bool leftIsCalc = true;
         bool rightIsCalc = true;
         std::unordered_map<TreeNode*,int>::iterator it_left;
@@ -309,6 +345,165 @@ bool isBalancedNoRecursion(TreeNode* root)
     }
     return true;
 }
+
+//Версия без рекурсии но по памяти O(H) O(logN)
+bool isBalancedNoRecursion(TreeNode* root)
+{
+    std::stack<TreeNode*> st;
+    std::stack<int> heights;
+
+    TreeNode* cur = root;
+    TreeNode* lastVisited = nullptr;
+
+    while(cur || !st.empty())
+    {
+        while(cur)
+        {
+            st.push(cur);
+            cur = cur->left;
+        }
+
+        TreeNode* node = st.top();
+        if(node->right && node->right != lastVisited)
+        {
+            cur = node->right;
+        }
+        else
+        {
+            int height_1, height_2; 
+            if(node->left && node->right)
+            {
+                height_1 = heights.top();
+                heights.pop();
+                height_2 = heights.top();
+                heights.pop();
+            }
+            else if(node->left || node->right)
+            {
+                height_1 = heights.top();
+                heights.pop();
+                height_2 = 0;
+            }
+            else
+            {
+                height_1 = 0;
+                height_2 = 0;
+            }
+
+            if(std::abs(height_1 - height_2) > 1)
+            {
+                return false;
+            }
+            heights.push(std::max(height_1,height_2) + 1);
+
+            lastVisited = node;
+            st.pop();
+        }
+    }
+    return true;
+}
+
+//Найти максимальное расстояние между двумя нодами. Неважно через root или нет.
+int getMaxDiameter(TreeNode* root)
+{
+    int maxDiameter = 0;
+
+    std::stack<TreeNode*> st;
+    std::stack<int> heights;
+
+    TreeNode* cur = root;
+    TreeNode* lastVisited = nullptr;
+
+    while(cur || !st.empty())
+    {
+        while(cur)
+        {
+            st.push(cur);
+            cur = cur->left;
+        }
+
+        TreeNode* node = st.top();
+        if(node->right && node->right != lastVisited)
+        {
+            cur = node->right;
+        }
+        else
+        {
+            int height_1, height_2; 
+            if(node->left && node->right)
+            {
+                height_1 = heights.top();
+                heights.pop();
+                height_2 = heights.top();
+                heights.pop();
+            }
+            else if(node->left || node->right)
+            {
+                height_1 = heights.top();
+                heights.pop();
+                height_2 = 0; 
+            }
+            else
+            {
+                height_1 = 0;
+                height_2 = 0;
+            }
+            maxDiameter = std::max(height_1+height_2,maxDiameter); 
+
+            heights.push(std::max(height_1,height_2) + 1);
+
+            lastVisited = node;
+            st.pop();
+        }
+    }
+    return maxDiameter;
+}
+
+//То же самое но с рекурсией
+int getHeight(TreeNode* node, int& maxDiameter)
+{
+    if(!node)
+    {
+        return 0;
+    }
+    int leftHeight = getHeight(node->left,maxDiameter);
+    int rightHeight = getHeight(node->right,maxDiameter);
+    maxDiameter = std::max(leftHeight + rightHeight,maxDiameter);
+
+    return std::max(leftHeight,rightHeight) + 1; 
+}
+
+int getMaxDiameterRecursion(TreeNode* root)
+{
+    int maxDiameter = 0;
+    getHeight(root,maxDiameter);
+    return maxDiameter;
+}
+
+
+
+//Задачи Top Down - родитель сообщает потомкам информацию
+
+
+// Вернуть true, если существует путь от КОРНЯ до ЛИСТА,
+// сумма значений на котором равна targetSum
+
+
+bool hasPathSum(TreeNode* root, int targetSum) {
+    if(!root)
+    {
+        return false;
+    }
+
+    targetSum -= root->val;
+
+    if(!root->left && !root->right && targetSum == 0)
+    {
+        return true;
+    }
+    return hasPathSum(root->left,targetSum) || hasPathSum(root->right,targetSum);
+}
+
 
 int main()
 {

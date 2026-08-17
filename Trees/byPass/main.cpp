@@ -505,6 +505,48 @@ bool hasPathSum(TreeNode* root, int targetSum) {
 }
 
 
+// Проверить, является ли дерево корректным BST
+bool isValidBST(TreeNode* root) {
+    if(!root)
+    {
+        return true;
+    }
+
+    auto goRight = [](TreeNode* node)
+    {
+        while(node->right)
+        {
+            node = node->right;
+        }
+        return node;
+    };
+
+    auto goLeft = [](TreeNode* node)
+    {
+        while(node->left)
+        {
+            node = node->left;
+        }
+        return node;
+    };
+
+    if(root->left)
+    {
+        if(root->val < root->left->val || root->val < goRight(root->left)->val)
+        {
+            return false;
+        }
+    }
+    if(root->right)
+    {
+        if(root->val > root->right->val || root->val > goLeft(root->right)->val)
+        {
+            return false;
+        }
+    }
+    return isValidBST(root->right) && isValidBST(root->left);
+}
+
 int main()
 {
     // std::random_device rd;

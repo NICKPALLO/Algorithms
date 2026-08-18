@@ -484,11 +484,8 @@ int getMaxDiameterRecursion(TreeNode* root)
 
 //Задачи Top Down - родитель сообщает потомкам информацию
 
-
 // Вернуть true, если существует путь от КОРНЯ до ЛИСТА,
 // сумма значений на котором равна targetSum
-
-
 bool hasPathSum(TreeNode* root, int targetSum) {
     if(!root)
     {
@@ -504,47 +501,97 @@ bool hasPathSum(TreeNode* root, int targetSum) {
     return hasPathSum(root->left,targetSum) || hasPathSum(root->right,targetSum);
 }
 
-
 // Проверить, является ли дерево корректным BST
-bool isValidBST(TreeNode* root) {
+bool isValidBST(TreeNode* root, int64_t min = std::numeric_limits<int64_t>::min(), int64_t max = std::numeric_limits<int64_t>::max()) {
     if(!root)
     {
         return true;
     }
 
-    auto goRight = [](TreeNode* node)
-    {
-        while(node->right)
-        {
-            node = node->right;
-        }
-        return node;
-    };
+    return static_cast<int64_t>(root->val) > min && static_cast<int64_t>(root->val) < max && 
+        isValidBST(root->left,min,static_cast<int64_t>(root->val)) && 
+        isValidBST(root->right,static_cast<int64_t>(root->val),max);
+}
 
-    auto goLeft = [](TreeNode* node)
+
+// Вернуть k-ое по величине (k-ое наименьшее, 1-indexed) значение в BST
+int kthSmallest(TreeNode* root, int k) {
+    
+    if(!root)
     {
-        while(node->left)
+        return std::numeric_limits<int>::min();
+    }
+
+    std::stack<TreeNode*> st;
+
+    auto goToLeft = [&st](TreeNode* node){
+        while(node)
         {
+            st.push(node);
             node = node->left;
         }
-        return node;
     };
 
-    if(root->left)
+    int grade = 0;
+    goToLeft(root);
+
+    while(!st.empty())
     {
-        if(root->val < root->left->val || root->val < goRight(root->left)->val)
+        TreeNode* currentNode = st.top();
+        st.pop();
+
+        if(++grade == k)
         {
-            return false;
+            return currentNode->val;
+        }
+
+        goToLeft(currentNode->right);
+    }      
+    return std::numeric_limits<int>::min();
+}
+
+// root — корень BST
+// p, q — два узла, ГАРАНТИРОВАННО существующие в дереве
+// Вернуть их наименьшего общего предка (LCA)
+TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+    TreeNode* lowestAncestor = root;
+    while(true)
+    {    
+        if(p->val < lowestAncestor->val && q->val < lowestAncestor->val)
+        {
+            lowestAncestor = lowestAncestor->left;
+        }
+        else if(p->val > lowestAncestor->val && q->val > lowestAncestor->val)
+        {
+            lowestAncestor = lowestAncestor->right;
+        }   
+        else
+        {
+            break;
         }
     }
-    if(root->right)
+    return lowestAncestor;
+}
+
+
+
+// root — корень ОБЫЧНОГО бинарного дерева (НЕ BST, никакого порядка значений)
+// p, q — гарантированно существуют в дереве
+// Вернуть LCA
+TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+    if (!root) return nullptr;
+    if (root == p || root == q) return root;
+    
+    TreeNode* left = lowestCommonAncestor(root->left, p, q);
+    TreeNode* right = lowestCommonAncestor(root->right, p, q);
+    
+    if(left)
+    if(!left && !right)
     {
-        if(root->val > root->right->val || root->val > goLeft(root->right)->val)
-        {
-            return false;
-        }
+        return nullptr;
     }
-    return isValidBST(root->right) && isValidBST(root->left);
+
+    // Что нужно сделать с left и right, чтобы получить ответ?
 }
 
 int main()

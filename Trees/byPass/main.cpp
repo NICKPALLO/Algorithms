@@ -4,6 +4,8 @@
 #include <stack>
 #include <queue>
 #include <unordered_map>
+#include <string>
+
 struct TreeNode {
     int val;
     TreeNode *left;
@@ -58,6 +60,7 @@ std::vector<int> inorderTraversal(TreeNode* root) {
     return res;
 }
 
+//preorder
 //корень → лево → право.
 //Выучить
 std::vector<int> PreorderTraversal(TreeNode* root)
@@ -573,8 +576,6 @@ TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
     return lowestAncestor;
 }
 
-
-
 // root — корень ОБЫЧНОГО бинарного дерева (НЕ BST, никакого порядка значений)
 // p, q — гарантированно существуют в дереве
 // Вернуть LCA
@@ -585,14 +586,114 @@ TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
     TreeNode* left = lowestCommonAncestor(root->left, p, q);
     TreeNode* right = lowestCommonAncestor(root->right, p, q);
     
-    if(left)
-    if(!left && !right)
+    if(left && right)
+    {
+        return root;
+    }
+    else if(!left && !right)
     {
         return nullptr;
     }
-
-    // Что нужно сделать с left и right, чтобы получить ответ?
+    else if(!left)
+    {
+        return right;
+    }
+    else
+    {
+        return left;
+    }
 }
+
+
+// Найти путь с МАКСИМАЛЬНОЙ суммой значений между любыми двумя узлами.
+// Путь не обязан проходить через корень.
+// Путь — это последовательность узлов, где каждая пара соседних 
+// соединена ребром. Узел может встретиться в пути только один раз.
+int helper(TreeNode* node, int& maxSum) 
+{ 
+    if (!node) return 0; 
+    int left = std::max(0, helper(node->left, maxSum)); 
+    int right = std::max(0, helper(node->right, maxSum)); 
+    maxSum = std::max(maxSum, node->val + left + right); 
+    return node->val + std::max(left, right); 
+}
+
+int getMaxSum(TreeNode* root)
+{
+    if(!root)
+    {
+        throw std::runtime_error("root is nullptr");
+    }
+    int maxSum = root->val;
+    helper(root,maxSum);
+    return maxSum;
+}
+
+
+// Требование: deserialize(serialize(root)) должно восстанавливать дерево, 
+//идентичное по структуре исходному 
+//(не просто с теми же значениями — именно с той же формой, включая то, где именно nullptr).
+
+class Codec {
+public:
+    // Преобразует дерево в строку
+    std::string serialize(TreeNode* root) {
+        std::string serTree;
+        insertNode(root,1,serTree);
+        return serTree;
+    }
+
+    // Восстанавливает дерево из строки
+    TreeNode* deserialize(std::string data) {
+        // ваш код
+    }
+
+
+private:
+    void insertNode(TreeNode* node, size_t index, std::string& serTree)
+    {
+        //найти место куда вставить, если нет, то добавлять null
+        if(!node)
+        {
+            return;
+        }
+
+        int amountNodes = 0;
+        size_t insertIndex = 0;
+        for(size_t i = 0; i < serTree.size();++i)
+        {   
+            if(serTree[i] == ',')
+            {
+                ++amountNodes;
+            }
+            if(index - 1 == amountNodes)
+            {
+                insertIndex = i;
+                break;    
+            }
+        }
+
+        if(index - 1 != amountNodes)
+        {
+            // значит нужно добавить элементы null
+
+            
+
+        }
+
+        //Забыли удалить null.
+
+
+        //На этом этапе у нас точно должны быть элементы до insertIndex
+        std::string substr = serTree.substr(insertIndex, serTree.size()-insertIndex + 1);
+        serTree.erase(serTree.begin()+insertIndex + 1,serTree.end());
+
+        serTree += ","+ std::to_string(node->val) + substr;
+
+        insertNode(node->left,index*2,serTree);
+        insertNode(node->right,(index*2)+1,serTree);
+    }
+};
 
 int main()
 {

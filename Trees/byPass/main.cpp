@@ -639,59 +639,106 @@ public:
     // Преобразует дерево в строку
     std::string serialize(TreeNode* root) {
         std::string serTree;
-        insertNode(root,1,serTree);
+        if(!root)
+        {
+            return serTree;
+        }
+        serTree+=std::to_string(root->val);
+        insertNode(root->left,serTree);
+        insertNode(root->right,serTree);
         return serTree;
     }
 
     // Восстанавливает дерево из строки
     TreeNode* deserialize(std::string data) {
-        // ваш код
+        TreeNode* root = nullptr;
+        if(data.empty())
+        {
+            return root;
+        }
+
+        std::string buf;
+        size_t i = 0;
+        while(i<data.size())
+        {
+            if(data[i] == ',')
+            {
+                break;
+            }
+            buf.push_back(data[i]);
+            ++i;
+        }
+        ++i; //чтобы потом не зацепить запятую
+
+        root = new TreeNode(std::stoi(buf)); 
+
+        std::stack<std::pair<TreeNode*,int>> st;
+        st.push({root,2});
+
+        while(i<data.size())
+        {
+            if(data[i] == ',')
+            {
+                auto& prevNode = st.top();
+                --prevNode.second;
+                if(buf != "null")
+                {
+                    if(prevNode.second == 1)
+                    {
+                        prevNode.first->left = new TreeNode(std::stoi(buf));
+                        st.push({prevNode.first->left,2});
+                    }
+                    else
+                    {
+                        prevNode.first->right = new TreeNode(std::stoi(buf));
+                        st.push({prevNode.first->right,2});
+                    }
+                }
+                if(prevNode.second == 0)
+                {
+                    st.pop();
+                }
+                buf.clear();
+            }
+            else
+            {
+                buf.push_back(data[i]);
+            }
+            if(i == data.size() -1)
+            {
+                if(buf != "null")
+                {
+                    auto& prevNode = st.top();
+                    if(prevNode.second == 1)
+                    {
+                        prevNode.first->left = new TreeNode(std::stoi(buf));
+                        st.push({prevNode.first->left,2});
+                    }
+                    else
+                    {
+                        prevNode.first->right = new TreeNode(std::stoi(buf));
+                        st.push({prevNode.first->right,2});
+                    }
+                }
+            }
+            ++i;
+        }
+        return root;
     }
 
 
 private:
-    void insertNode(TreeNode* node, size_t index, std::string& serTree)
+    void insertNode(TreeNode* node, std::string& serTree)
     {
-        //найти место куда вставить, если нет, то добавлять null
         if(!node)
         {
+            serTree += ",null";
             return;
         }
-
-        int amountNodes = 0;
-        size_t insertIndex = 0;
-        for(size_t i = 0; i < serTree.size();++i)
-        {   
-            if(serTree[i] == ',')
-            {
-                ++amountNodes;
-            }
-            if(index - 1 == amountNodes)
-            {
-                insertIndex = i;
-                break;    
-            }
-        }
-
-        if(index - 1 != amountNodes)
-        {
-            // значит нужно добавить элементы null
-
-            
-
-        }
-
-        //Забыли удалить null.
-
-
-        //На этом этапе у нас точно должны быть элементы до insertIndex
-        std::string substr = serTree.substr(insertIndex, serTree.size()-insertIndex + 1);
-        serTree.erase(serTree.begin()+insertIndex + 1,serTree.end());
-
-        serTree += ","+ std::to_string(node->val) + substr;
-
-        insertNode(node->left,index*2,serTree);
-        insertNode(node->right,(index*2)+1,serTree);
+        serTree += ","+std::to_string(node->val);
+        
+        insertNode(node->left,serTree);
+        insertNode(node->right,serTree);
     }
 };
 

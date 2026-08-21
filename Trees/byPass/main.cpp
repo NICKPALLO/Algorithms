@@ -643,7 +643,7 @@ public:
         {
             return serTree;
         }
-        serTree+=std::to_string(root->val);
+        serTree += std::to_string(root->val);
         insertNode(root->left,serTree);
         insertNode(root->right,serTree);
         return serTree;
@@ -658,71 +658,8 @@ public:
         }
 
         std::string buf;
-        size_t i = 0;
-        while(i<data.size())
-        {
-            if(data[i] == ',')
-            {
-                break;
-            }
-            buf.push_back(data[i]);
-            ++i;
-        }
-        ++i; //чтобы потом не зацепить запятую
-
-        root = new TreeNode(std::stoi(buf)); 
-
-        std::stack<std::pair<TreeNode*,int>> st;
-        st.push({root,2});
-
-        while(i<data.size())
-        {
-            if(data[i] == ',')
-            {
-                auto& prevNode = st.top();
-                --prevNode.second;
-                if(buf != "null")
-                {
-                    if(prevNode.second == 1)
-                    {
-                        prevNode.first->left = new TreeNode(std::stoi(buf));
-                        st.push({prevNode.first->left,2});
-                    }
-                    else
-                    {
-                        prevNode.first->right = new TreeNode(std::stoi(buf));
-                        st.push({prevNode.first->right,2});
-                    }
-                }
-                if(prevNode.second == 0)
-                {
-                    st.pop();
-                }
-                buf.clear();
-            }
-            else
-            {
-                buf.push_back(data[i]);
-            }
-            if(i == data.size() -1)
-            {
-                if(buf != "null")
-                {
-                    auto& prevNode = st.top();
-                    if(prevNode.second == 1)
-                    {
-                        prevNode.first->left = new TreeNode(std::stoi(buf));
-                        st.push({prevNode.first->left,2});
-                    }
-                    else
-                    {
-                        prevNode.first->right = new TreeNode(std::stoi(buf));
-                        st.push({prevNode.first->right,2});
-                    }
-                }
-            }
-            ++i;
-        }
+        size_t index = 0;
+        readNode(&root, index, data);
         return root;
     }
 
@@ -740,6 +677,28 @@ private:
         insertNode(node->left,serTree);
         insertNode(node->right,serTree);
     }
+
+    void readNode(TreeNode** node_ptr, size_t& index, const std::string& data)
+    {
+        std::string buf;
+        for(; index < data.size(); ++index)
+        {
+            if(data[index] == ',')
+            {
+                ++index;
+                break;
+            }
+
+            buf += data[index];
+        }
+        if(!buf.empty() && buf != "null")
+        {
+            *node_ptr = new TreeNode(std::stoi(buf));
+            readNode(&((*node_ptr)->left),index,data);
+            readNode(&((*node_ptr)->right),index,data);
+        }
+    }
+
 };
 
 int main()

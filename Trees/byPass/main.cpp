@@ -142,6 +142,7 @@ std::vector<int> postorderTraversal_2(TreeNode* root)
             st.pop();
         }
     }
+    return {};
 }
 
 //Вернуть vector<vector<int>>, где каждый вложенный vector — 
@@ -289,7 +290,7 @@ bool isBalanced_2(TreeNode* root)
 }
 
 //Версия без рекурсии но по памяти O(N)
-bool isBalancedNoRecursion(TreeNode* root)
+bool isBalancedNoRecursionWithMap(TreeNode* root)
 {
     if(!root)
     {
@@ -556,7 +557,7 @@ int kthSmallest(TreeNode* root, int k) {
 // root — корень BST
 // p, q — два узла, ГАРАНТИРОВАННО существующие в дереве
 // Вернуть их наименьшего общего предка (LCA)
-TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+TreeNode* lowestCommonAncestorBST(TreeNode* root, TreeNode* p, TreeNode* q) {
     TreeNode* lowestAncestor = root;
     while(true)
     {    
@@ -706,7 +707,5 @@ int main()
     // std::random_device rd;
     // std::mt19937 gen{rd()};    
     // std::uniform_int_distribution<unsigned> dist{0,10};
-
-
     return 0;
 }

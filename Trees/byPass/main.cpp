@@ -702,6 +702,96 @@ private:
 
 };
 
+struct TrieNode {
+    bool isEndOfWord = false;
+    std::unordered_map<char, TrieNode*> children;
+};
+
+class Trie {
+public:
+    Trie() {
+        root = new TrieNode();
+    }
+    
+    void insert(std::string word) {
+        TrieNode* currentNode = root;
+
+        for(int i = 0; i < word.size(); ++i)
+        {
+            auto it = currentNode->children.find(word[i]); 
+            if(it == currentNode->children.end())
+            {
+                currentNode->children[word[i]] = new TrieNode();
+                currentNode = currentNode->children[word[i]];
+            }
+            else
+            {
+                currentNode = it->second;
+            }
+        }
+        currentNode->isEndOfWord = true;
+    }
+    
+    bool search(std::string word) {
+        TrieNode* currentNode = root;
+        
+        for(int i = 0; i < word.size(); ++i)
+        {
+            auto it = currentNode->children.find(word[i]); 
+            if(it != currentNode->children.end())
+            {
+                currentNode = it->second;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return currentNode->isEndOfWord;
+    }
+    
+    bool startsWith(std::string prefix) {
+                TrieNode* currentNode = root;
+        
+        for(int i = 0; i < prefix.size(); ++i)
+        {
+            auto it = currentNode->children.find(prefix[i]); 
+            if(it != currentNode->children.end())
+            {
+                currentNode = it->second;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    ~Trie() {
+        std::stack<TrieNode*> st;
+        insertNodeInStack(root, st);
+
+        while(!st.empty())
+        {
+            delete st.top();
+            st.pop();
+        }
+    }
+
+private:
+    void insertNodeInStack(TrieNode* node, std::stack<TrieNode*>& st)
+    {
+        st.push(node);
+        for(auto& [let, child] : node->children)
+        {
+            insertNodeInStack(child, st);
+        }
+    }
+
+    TrieNode* root;
+};
+
 int main()
 {
     // std::random_device rd;

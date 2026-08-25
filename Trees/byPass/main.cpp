@@ -636,7 +636,7 @@ int getMaxSum(TreeNode* root)
 //(не просто с теми же значениями — именно с той же формой, включая то, где именно nullptr).
 
 class Codec {
-public:
+    public:
     // Преобразует дерево в строку
     std::string serialize(TreeNode* root) {
         std::string serTree;
@@ -665,7 +665,7 @@ public:
     }
 
 
-private:
+    private:
     void insertNode(TreeNode* node, std::string& serTree)
     {
         if(!node)
@@ -708,7 +708,8 @@ struct TrieNode {
 };
 
 class Trie {
-public:
+
+    public:
     Trie() {
         root = new TrieNode();
     }
@@ -779,7 +780,7 @@ public:
         }
     }
 
-private:
+    private:
     void insertNodeInStack(TrieNode* node, std::stack<TrieNode*>& st)
     {
         st.push(node);
@@ -791,6 +792,70 @@ private:
 
     TrieNode* root;
 };
+
+struct Node {
+    int val;
+    std::vector<Node*> children;
+};
+
+void processNode(Node* node, std::vector<int>& res)
+{
+    if(!node)
+    {
+        return;
+    }
+    res.push_back(node->val);
+    for(auto& child : node->children)
+    {
+        processNode(child, res);
+    }
+}
+
+// Вернуть preorder-обход N-ary дерева
+std::vector<int> preorder(Node* root) {
+    std::vector<int> res;
+    processNode(root, res);
+    return res;
+}
+
+/*
+массивы: 
+Two Pointers
+Sliding Window
+HashMap / Set
+Prefix Sum
+Kadane's Algorithm
+Merge Intervals
+Binary Search (классический + on Answer)
+-----
+Monotonic Stack
+Monotonic Deque
+Difference Array
+Quickselect (опционально, более нишевый)
+Sparse Table (опционально, скорее пересечение с "Деревья", можно пропустить или упомянуть вскользь)
+
+Деревья:
+Обходы(DFS) (inorder, preorder, postorder)
+Обход BFS level-order
+Bottom-up рекурсия
+Top-down рекурсия
+BST-паттерны
+LCA общий случай
+Path-задачи (сложные)
+Сериализация
+Trie
+N-ary деревья
+------
+Segment Tree
+Skip List
+
+ты даешь мне задачу и сначала я сам пытаюсь ее решить, пробую, 
+скидываю ответ и ты ее проверяешь, если правильно, отлично идем дальше, 
+если нет то наталкиваешь меня к решению, но решение не показываешь. 
+И если только я сдаюсь и прошу тебя показать решение, ты его показываешь. 
+В общем моя цель - освоить и развить навык решения таких задач, чтобы пройти собеседование.
+
+*/
 
 int main()
 {

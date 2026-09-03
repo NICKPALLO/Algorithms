@@ -84,9 +84,68 @@ int getNumberOfIslands(const std::vector<std::vector<char>>& grid)
 }
 
 
+//У тебя n курсов, пронумерованных от 0 до n-1. 
+//Дан список пар prerequisites, где prerequisites[i] = [a, b] означает 
+//"чтобы взять курс a, нужно сначала закончить курс b". 
+//Определи, можно ли закончить все курсы (то есть нет ли циклической зависимости).
+
+bool findCircles(size_t n, const std::vector<std::pair<size_t,size_t>>& prerequisites)
+{
+    std::vector<size_t> graph(n,-1);
+//[[1,0], [3,1], [0,3], [2,0]]
+    for(const auto& pair : prerequisites)
+    {
+        graph[pair.second] = pair.first;
+    }
+    
+    std::vector<bool> finit_find(n,false);
+
+    auto CheckSequence = [&graph,&n,&finit_find](size_t current_index)
+    {
+        std::vector<bool> visited(n,false);
+        visited[current_index] = true;
+
+        current_index = graph[current_index];
+
+        while(true)
+        {
+            if(visited[current_index])
+            {
+                return true; //Цикл есть
+            }
+            if(graph[current_index] == -1 || finit_find[current_index])
+            {
+                for(size_t i = 0; i < visited.size(); ++i)
+                {
+                    finit_find[i] = visited[i] || finit_find[i] ? true : false;
+                }
+                return false; //Цикла нету
+            }
+            visited[current_index] = true;
+            current_index = graph[current_index];
+        }
+
+    };
+
+    for(size_t i = 0; i < n; ++i)
+    {
+        if(finit_find[i])
+        {
+            continue;
+        }
+        else if(CheckSequence(i))
+        {
+            return true; //Цикл есть
+        }
+    }
+
+    return false; //Цикла нету
+}
+
+
+
 int main()
 {
-    
     // std::random_device rd;
     // std::mt19937 gen{rd()};    
     // std::uniform_int_distribution<unsigned> dist{0,10};

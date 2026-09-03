@@ -19,17 +19,17 @@ grid = [
 ]
 Ответ: 3*/
 
-
-struct PairKeyHasher {
-    std::size_t operator()(const std::pair<size_t,size_t>& p) const noexcept {
-        return (std::hash<size_t>()(p.first) << 1) ^ std::hash<size_t>()(p.second);
-    }
-};
-
 int getNumberOfIslands(const std::vector<std::vector<char>>& grid)
 {
     int numberOfIslands = 0;
-    std::unordered_set<std::pair<size_t,size_t>,PairKeyHasher> visited;
+
+    std::vector<std::vector<bool>> visited;
+    visited.reserve(grid.size());
+    for(size_t i = 0; i < grid.size(); ++i)
+    {
+        visited.push_back(std::vector<bool>(grid[i].size(),false));
+    }
+
 
     auto visiteIsland = [&grid, &visited](size_t i, size_t j){
         std::stack<std::pair<size_t,size_t>> st;
@@ -38,37 +38,33 @@ int getNumberOfIslands(const std::vector<std::vector<char>>& grid)
         {
             auto pair = st.top();
             st.pop();
-            visited.insert(pair);
 
             std::pair<size_t,size_t> left(pair.first-1,pair.second);
             std::pair<size_t,size_t> right(pair.first+1,pair.second);
             std::pair<size_t,size_t> top(pair.first,pair.second-1);
             std::pair<size_t,size_t> bottom(pair.first,pair.second+1);
 
-
-            if(pair.first != 0 && grid[pair.first-1][pair.second] == '1' && visited.find({pair.first-1,pair.second}) == visited.end())
+            if(pair.first != 0 && grid[left.first][left.second] == '1' && !visited[left.first][left.second])
             {
-                //Проверяем точку слева
-                st.push({pair.first-1,pair.second});
+                visited[left.first][left.second] = true;
+                st.push(left);
             }
-            if(pair.first+1 != grid.size() && grid[pair.first+1][pair.second] == '1' && visited.find({pair.first+1,pair.second}) == visited.end())
+            if(pair.first+1 != grid.size() && grid[right.first][right.second] == '1' && !visited[right.first][right.second])
             {
-                //Проверяем точку справа
-                st.push({pair.first+1,pair.second});
+                visited[right.first][right.second] = true;
+                st.push(right);
             }
-            if(pair.second != 0 && grid[pair.first][pair.second-1] == '1' && visited.find({pair.first,pair.second-1}) == visited.end())
+            if(pair.second != 0 && grid[top.first][top.second] == '1' && !visited[top.first][top.second])
             {
-                //Проверяем точку сверху
-                st.push({pair.first,pair.second-1});
+                visited[top.first][top.second] = true;
+                st.push(top);
             }
-            if(pair.second+1 != grid[pair.first].size() && grid[pair.first][pair.second+1] == '1' && visited.find({pair.first,pair.second+1}) == visited.end())
+            if(pair.second+1 != grid[pair.first].size() && grid[bottom.first][bottom.second] == '1' && !visited[bottom.first][bottom.second])
             {
-                //Проверяем точку снизу
-                st.push({pair.first,pair.second+1});
+                visited[bottom.first][bottom.second] = true;
+                st.push(bottom);
             }
-
         }
-
     };
 
 
@@ -76,14 +72,15 @@ int getNumberOfIslands(const std::vector<std::vector<char>>& grid)
     {
         for(size_t j = 0; j < grid[i].size(); ++j)
         {
-            if(grid[i][j] == '1' && visited.find({i,j}) == visited.end())
+            if(grid[i][j] == '1' && !visited[i][j])
             {
                 ++numberOfIslands;
+                visited[i][j] = true;
                 visiteIsland(i,j);
             }
         }
     }
-    return 0;
+    return numberOfIslands;
 }
 
 

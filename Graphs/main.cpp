@@ -91,40 +91,59 @@ int getNumberOfIslands(const std::vector<std::vector<char>>& grid)
 
 bool findCircles(size_t n, const std::vector<std::pair<size_t,size_t>>& prerequisites)
 {
-    std::vector<size_t> graph(n,-1);
-//[[1,0], [3,1], [0,3], [2,0]]
+    std::vector<std::vector<size_t>> graph(n);
+
     for(const auto& pair : prerequisites)
     {
-        graph[pair.second] = pair.first;
+        graph[pair.second].push_back(pair.first);
     }
     
     std::vector<bool> finit_find(n,false);
 
-    auto CheckSequence = [&graph,&n,&finit_find](size_t current_index)
+    auto CheckSequence = [&graph,&n,&finit_find](size_t index)
     {
+        std::vector<bool> processed(n,false);
         std::vector<bool> visited(n,false);
-        visited[current_index] = true;
+        std::stack<size_t> st;
+        st.push(index);
 
-        current_index = graph[current_index];
-
-        while(true)
+        while(!st.empty())
         {
-            if(visited[current_index])
+            size_t current_index = st.top();
+            st.pop();
+            
+            if(graph[current_index].empty())
             {
-                return true; //Цикл есть
-            }
-            if(graph[current_index] == -1 || finit_find[current_index])
-            {
+                processed[current_index] = true; 
                 for(size_t i = 0; i < visited.size(); ++i)
                 {
-                    finit_find[i] = visited[i] || finit_find[i] ? true : false;
+                    processed[i] = visited[i] || processed[i] ? true : false;
                 }
-                return false; //Цикла нету
+                visited.clear();
+                continue;
+            }
+
+            if(finit_find[current_index])
+            {
+                continue;
+            }
+            if(visited[current_index])
+            {
+                return true;//есть цикл
             }
             visited[current_index] = true;
-            current_index = graph[current_index];
+
+            for(auto prerequisite : graph[current_index])
+            {
+                st.push(prerequisite);
+            }
         }
 
+        for(size_t i = 0; i < processed.size(); ++i)
+        {
+            finit_find[i] = processed[i] || finit_find[i] ? true : false;
+        }
+        return false;
     };
 
     for(size_t i = 0; i < n; ++i)

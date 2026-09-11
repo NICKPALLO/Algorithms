@@ -3,6 +3,9 @@
 #include <random>
 #include <unordered_map>
 
+//ЧТо здесь важно - Для различных условий какую-лобо из границ можно запонимать (задача 2)
+
+
 int getMaxSum(std::vector<int>& v, int k)
 {
     if(v.size()<k)
